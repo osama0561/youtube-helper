@@ -3,102 +3,80 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lather &amp; Co — Store Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<title>Lather &amp; Co — Store Performance Dashboard</title>
+<script src="vendor/chart.umd.min.js"></script>
+<script src="data.js"></script>
 <style>
   :root {
-    --bg: #0f1116;
-    --panel: #181b23;
-    --panel-2: #1f2330;
-    --line: #2a2f3d;
-    --text: #e7eaf0;
-    --muted: #8b93a7;
-    --accent: #6ea8fe;
-    --green: #4ade80;
-    --red: #f87171;
-    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+    --bg:#0f1116; --panel:#181b23; --panel-2:#1f2330; --line:#2a2f3d;
+    --text:#e7eaf0; --muted:#8b93a7; --accent:#6ea8fe; --violet:#a78bfa;
+    --green:#4ade80; --amber:#fbbf24; --red:#f87171; --pink:#f472b6; --cyan:#22d3ee;
+    --shadow:0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.45;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 60px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:28px 24px 64px}
 
-  /* Header */
-  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .logo {
-    width: 42px; height: 42px; border-radius: 12px;
-    background: linear-gradient(135deg, #6ea8fe, #a78bfa);
-    display: grid; place-items: center; font-size: 22px;
-  }
-  .brand h1 { font-size: 18px; font-weight: 650; letter-spacing: -.2px; }
-  .brand p { font-size: 13px; color: var(--muted); }
-  .range {
-    display: flex; gap: 4px; background: var(--panel); padding: 4px;
-    border-radius: 10px; border: 1px solid var(--line);
-  }
-  .range button {
-    background: none; border: none; color: var(--muted); cursor: pointer;
-    padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 550;
-    transition: all .15s;
-  }
-  .range button.active { background: var(--panel-2); color: var(--text); }
-  .range button:hover:not(.active) { color: var(--text); }
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:16px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#6ea8fe,#a78bfa);
+        display:grid;place-items:center;font-size:23px}
+  .brand h1{font-size:19px;font-weight:680;letter-spacing:-.3px}
+  .brand p{font-size:13px;color:var(--muted)}
+  .period{font-size:13px;color:var(--muted);text-align:right}
+  .period b{color:var(--text);font-weight:600}
 
-  /* KPI cards */
-  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
-  .card {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: 14px; padding: 18px; box-shadow: var(--shadow);
-  }
-  .kpi-label { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-  .kpi-value { font-size: 27px; font-weight: 680; letter-spacing: -.5px; margin: 8px 0 4px; }
-  .delta { font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-  .delta.up { color: var(--green); }
-  .delta.down { color: var(--red); }
-  .delta span.vs { color: var(--muted); font-weight: 500; }
+  .section-title{font-size:13px;font-weight:650;color:var(--muted);text-transform:uppercase;
+                 letter-spacing:.6px;margin:30px 0 14px}
 
-  /* Charts grid */
-  .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 22px; }
-  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .panel-head h3 { font-size: 15px; font-weight: 620; }
-  .panel-head .sub { font-size: 12.5px; color: var(--muted); }
-  .chart-box { position: relative; height: 260px; }
-  .chart-box.sm { height: 230px; }
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:var(--shadow)}
+  .kpi-label{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .kpi-value{font-size:25px;font-weight:700;letter-spacing:-.5px;margin:7px 0 3px}
+  .kpi-sub{font-size:12px;color:var(--muted)}
+  .kpi-sub b{font-weight:600}
+  .pos{color:var(--green)} .neg{color:var(--red)} .warn{color:var(--amber)}
 
-  /* Bottom grid */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid{display:grid;gap:14px}
+  .g-2{grid-template-columns:1fr 1fr}
+  .g-23{grid-template-columns:1.6fr 1fr}
+  .g-3{grid-template-columns:1fr 1fr 1fr}
 
-  /* Product table */
-  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  th { text-align: left; color: var(--muted); font-weight: 550; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; padding: 0 0 10px; }
-  td { padding: 11px 0; border-top: 1px solid var(--line); }
-  .prod { display: flex; align-items: center; gap: 11px; }
-  .swatch { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
-  .prod small { color: var(--muted); display: block; font-size: 12px; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .bar-mini { height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
-  .bar-mini > div { height: 100%; border-radius: 3px; background: var(--accent); }
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px}
+  .panel-head h3{font-size:15px;font-weight:640}
+  .panel-head .sub{font-size:12.5px;color:var(--muted)}
+  .toggle{display:flex;gap:3px;background:var(--panel-2);padding:3px;border-radius:8px;border:1px solid var(--line)}
+  .toggle button{background:none;border:none;color:var(--muted);cursor:pointer;padding:5px 12px;
+                 border-radius:6px;font-size:12.5px;font-weight:560;transition:.15s}
+  .toggle button.active{background:var(--panel);color:var(--text)}
+  .chart-box{position:relative;height:280px}
+  .chart-box.sm{height:250px}
 
-  /* Funnel */
-  .funnel-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-  .funnel-row:last-child { margin-bottom: 0; }
-  .funnel-label { width: 130px; font-size: 13px; color: var(--muted); flex-shrink: 0; }
-  .funnel-track { flex: 1; }
-  .funnel-bar { height: 30px; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 13px; font-weight: 600; color: #0f1116; }
-  .funnel-val { width: 110px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
-  .funnel-val small { color: var(--muted); }
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:550;font-size:11px;text-transform:uppercase;
+     letter-spacing:.4px;padding:0 8px 10px 0}
+  th.num,td.num{text-align:right}
+  td{padding:10px 8px 10px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+  .prod{display:flex;align-items:center;gap:10px}
+  .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+  .prod small{color:var(--muted);display:block;font-size:11.5px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:600}
+  .bar-mini{height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;min-width:60px}
+  .bar-mini>div{height:100%;border-radius:3px}
 
-  footer { margin-top: 28px; text-align: center; color: var(--muted); font-size: 12.5px; }
+  .insight{background:linear-gradient(135deg,rgba(110,168,254,.08),rgba(167,139,250,.06));
+           border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;
+           padding:13px 15px;font-size:13.5px;color:var(--text);margin-top:14px}
+  .insight b{color:#fff}
+  .insight .h{font-size:12px;color:var(--accent);font-weight:650;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
 
-  @media (max-width: 860px) {
-    .kpis { grid-template-columns: repeat(2, 1fr); }
-    .grid, .grid-2 { grid-template-columns: 1fr; }
+  footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px}
+  footer code{background:var(--panel-2);padding:2px 7px;border-radius:5px;font-size:12px}
+
+  @media (max-width:920px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .g-2,.g-23,.g-3{grid-template-columns:1fr}
   }
 </style>
 </head>
@@ -109,242 +87,341 @@
     <div class="brand">
       <div class="logo">🧴</div>
       <div>
-        <h1>Lather &amp; Co.</h1>
-        <p>Shampoo &amp; haircare · Store dashboard</p>
+        <h1 id="store-name">—</h1>
+        <p id="store-sub">—</p>
       </div>
     </div>
-    <div class="range" id="range">
-      <button data-r="7">7 days</button>
-      <button data-r="30" class="active">30 days</button>
-      <button data-r="90">90 days</button>
-    </div>
+    <div class="period" id="period">—</div>
   </header>
 
-  <!-- KPI cards -->
+  <!-- KPIs -->
+  <div class="section-title">Headline metrics</div>
   <section class="kpis" id="kpis"></section>
 
-  <!-- Revenue + channels -->
-  <section class="grid">
+  <!-- Revenue & margin trend -->
+  <div class="section-title">Revenue &amp; profitability</div>
+  <section class="grid g-23">
     <div class="card">
       <div class="panel-head">
-        <h3>Revenue</h3>
-        <div class="sub" id="rev-sub"></div>
+        <div><h3>Revenue &amp; gross margin</h3><div class="sub" id="trend-sub"></div></div>
+        <div class="toggle" id="trend-toggle">
+          <button data-g="daily" class="active">Daily</button>
+          <button data-g="monthly">Monthly</button>
+        </div>
       </div>
       <div class="chart-box"><canvas id="revChart"></canvas></div>
     </div>
     <div class="card">
-      <div class="panel-head"><h3>Sales by channel</h3></div>
+      <div class="panel-head"><div><h3>Revenue by month</h3><div class="sub">trend & seasonality</div></div></div>
+      <div class="chart-box"><canvas id="monthChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Channels -->
+  <div class="section-title">Marketing channels</div>
+  <section class="grid g-23">
+    <div class="card">
+      <div class="panel-head"><div><h3>Channel performance</h3><div class="sub">revenue, return on ad spend &amp; acquisition cost</div></div></div>
+      <table>
+        <thead><tr>
+          <th>Channel</th><th class="num">Orders</th><th class="num">Revenue</th>
+          <th class="num">ROAS</th><th class="num">CAC</th><th class="num">Net margin</th>
+        </tr></thead>
+        <tbody id="channel-body"></tbody>
+      </table>
+      <div class="insight" id="channel-insight"></div>
+    </div>
+    <div class="card">
+      <div class="panel-head"><div><h3>Revenue share</h3><div class="sub">by channel</div></div></div>
       <div class="chart-box sm"><canvas id="channelChart"></canvas></div>
     </div>
   </section>
 
-  <!-- Products + funnel -->
-  <section class="grid-2">
+  <!-- Products + categories -->
+  <div class="section-title">Products</div>
+  <section class="grid g-23">
     <div class="card">
-      <div class="panel-head">
-        <h3>Top products</h3>
-        <div class="sub">by revenue</div>
-      </div>
+      <div class="panel-head"><div><h3>Top products</h3><div class="sub">by revenue, with margin</div></div></div>
       <table>
-        <thead>
-          <tr><th>Product</th><th class="num">Units</th><th class="num">Revenue</th><th style="width:90px">Share</th></tr>
-        </thead>
+        <thead><tr>
+          <th>Product</th><th class="num">Units</th><th class="num">Revenue</th>
+          <th class="num">Margin&nbsp;%</th><th class="num">Stock</th>
+        </tr></thead>
         <tbody id="prod-body"></tbody>
       </table>
     </div>
     <div class="card">
-      <div class="panel-head">
-        <h3>Conversion funnel</h3>
-        <div class="sub" id="funnel-sub"></div>
-      </div>
-      <div id="funnel"></div>
+      <div class="panel-head"><div><h3>Category mix</h3><div class="sub">by revenue</div></div></div>
+      <div class="chart-box sm"><canvas id="catChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Customers -->
+  <div class="section-title">Customers</div>
+  <section class="grid g-3">
+    <div class="card">
+      <div class="panel-head"><div><h3>Customer segments</h3><div class="sub">by lifetime value</div></div></div>
+      <div class="chart-box sm"><canvas id="segChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="panel-head"><div><h3>New vs returning</h3><div class="sub">revenue contribution</div></div></div>
+      <div class="chart-box sm"><canvas id="nrChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="panel-head"><div><h3>Revenue by country</h3><div class="sub">top markets</div></div></div>
+      <div class="chart-box sm"><canvas id="geoChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Returns -->
+  <div class="section-title">Returns &amp; refunds</div>
+  <section class="grid g-23">
+    <div class="card">
+      <div class="panel-head"><div><h3>Return reasons</h3><div class="sub" id="returns-sub"></div></div></div>
+      <div class="chart-box sm"><canvas id="returnChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="panel-head"><div><h3>What's driving returns</h3></div></div>
+      <div id="return-insight"></div>
     </div>
   </section>
 
   <footer>
-    Demo dashboard · figures are sample data for preview only · <span id="updated"></span>
+    Driven entirely by <code id="source-name">store-data.xlsx</code> ·
+    edit the spreadsheet and run <code>python3 build_dashboard_data.py</code> to refresh ·
+    <span id="period-foot"></span>
   </footer>
 
 </div>
 
 <script>
-// ---------- Sample data (fake numbers, real ecommerce metrics) ----------
-const PRODUCTS = [
-  { name: "Rosemary Mint Strengthening", sku: "Anti-hair-loss · 300ml", color: "#6ea8fe", price: 24, weight: 30 },
-  { name: "Argan Repair Shampoo",        sku: "Dry/damaged · 300ml",   color: "#a78bfa", price: 22, weight: 24 },
-  { name: "Daily Clarifying Wash",       sku: "All hair types · 500ml", color: "#4ade80", price: 18, weight: 20 },
-  { name: "Volume Boost Duo",            sku: "Shampoo + conditioner",  color: "#fbbf24", price: 38, weight: 16 },
-  { name: "Color-Safe Sulfate-Free",     sku: "Dyed hair · 300ml",      color: "#f472b6", price: 26, weight: 10 },
+const D = window.STORE_DATA;
+const COLORS = ["#6ea8fe","#a78bfa","#4ade80","#fbbf24","#f472b6","#22d3ee","#fb923c","#94a3b8"];
+const $ = id => document.getElementById(id);
+const money = n => "$" + Math.round(n).toLocaleString("en-US");
+const money2 = n => "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const moneyK = n => "$" + (n/1000).toFixed(n>=10000?0:1) + "k";
+const pct = (n,dp=1) => (n*100).toFixed(dp) + "%";
+
+// Chart.js global theming
+Chart.defaults.color = "#8b93a7";
+Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+const TT = { backgroundColor:"#1f2330", borderColor:"#2a2f3d", borderWidth:1,
+             titleColor:"#e7eaf0", bodyColor:"#e7eaf0", padding:10, displayColors:false };
+
+// ---------- Header ----------
+$("store-name").textContent = D.meta.store;
+$("store-sub").textContent = D.meta.subtitle;
+const fmtDate = s => new Date(s+"T00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+$("period").innerHTML = `<b>${fmtDate(D.meta.start)} → ${fmtDate(D.meta.end)}</b><br>${D.meta.days} days of trading`;
+$("source-name").textContent = D.meta.source;
+$("source-name") && ($("source-name").textContent = D.meta.source);
+$("period-foot").textContent = D.meta.days + " days";
+
+// ---------- KPI cards ----------
+const k = D.kpis;
+const kpiCards = [
+  { label:"💰 Total revenue", value:money(k.revenue),
+    sub:`<b>${money2(k.aov)}</b> avg order value` },
+  { label:"📈 Gross margin", value:money(k.grossMargin),
+    sub:`<b class="pos">${pct(k.grossMarginPct)}</b> margin rate` },
+  { label:"📦 Orders", value:k.orders.toLocaleString(),
+    sub:`<b>${k.customers.toLocaleString()}</b> paying customers` },
+  { label:"🛒 Conversion rate", value:pct(k.conversionRate,2),
+    sub:`site visits → orders` },
+  { label:"📣 Ad spend", value:money(k.adSpend),
+    sub:`<b class="pos">${k.roas.toFixed(1)}x</b> blended ROAS` },
+  { label:"🔁 Repeat-customer rate", value:pct(k.repeatRate),
+    sub:`<b>${money2(k.avgLtv)}</b> avg lifetime value` },
+  { label:"↩️ Return rate", value:pct(k.returnRate),
+    sub:`<b class="warn">${money(k.refundTotal)}</b> refunded` },
+  { label:"🏷️ Discounts given", value:money(k.discountTotal),
+    sub:`across all orders` },
 ];
+$("kpis").innerHTML = kpiCards.map(c => `
+  <div class="card">
+    <div class="kpi-label">${c.label}</div>
+    <div class="kpi-value">${c.value}</div>
+    <div class="kpi-sub">${c.sub}</div>
+  </div>`).join("");
 
-const CHANNELS = [
-  { label: "Online store", value: 58, color: "#6ea8fe" },
-  { label: "Instagram / Meta", value: 21, color: "#a78bfa" },
-  { label: "Amazon", value: 14, color: "#fbbf24" },
-  { label: "TikTok Shop", value: 7, color: "#4ade80" },
-];
-
-// Per-range aggregates (preview values). Deltas are vs. previous period.
-const RANGES = {
-  7:  { revenue: 18420, orders: 642, visitors: 9120, repeat: 31.5, days: 7,  revDelta: 8.2,  ordDelta: 6.4,  aovDelta: 1.7,  cvrDelta: 0.9, repeatDelta: 2.1 },
-  30: { revenue: 76340, orders: 2680, visitors: 41200, repeat: 34.2, days: 30, revDelta: 12.4, ordDelta: 9.1,  aovDelta: 3.0,  cvrDelta: -0.6, repeatDelta: 4.3 },
-  90: { revenue: 214900, orders: 7510, visitors: 128400, repeat: 38.6, days: 90, revDelta: 19.8, ordDelta: 14.2, aovDelta: 4.9, cvrDelta: 1.4, repeatDelta: 6.0 },
-};
-
-const fmtMoney = n => "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
-const fmtMoney2 = n => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-// Deterministic pseudo-random so the chart looks organic but stable per range
-function seriesFor(days, total) {
-  const out = [];
-  let acc = 0;
-  for (let i = 0; i < days; i++) {
-    const wave = 1 + 0.35 * Math.sin(i / 3.3) + 0.15 * Math.sin(i / 1.7 + 2);
-    const weekend = ([0,6].includes(i % 7)) ? 1.25 : 1;  // weekends sell more
-    const v = wave * weekend;
-    out.push(v);
-    acc += v;
-  }
-  return out.map(v => Math.round((v / acc) * total));
+// ---------- Revenue & margin trend (daily/monthly) ----------
+let revChart;
+function gradient(ctx, hex){
+  const g = ctx.createLinearGradient(0,0,0,280);
+  g.addColorStop(0, hex+"55"); g.addColorStop(1, hex+"00"); return g;
 }
-
-function dateLabels(days) {
-  const labels = [];
-  const end = new Date(2026, 5, 29); // fixed "today" for the demo
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(end);
-    d.setDate(end.getDate() - i);
-    labels.push(d.toLocaleDateString("en-US", { month: "short", day: "numeric" }));
-  }
-  return labels;
-}
-
-let revChart, channelChart;
-
-function delta(val) {
-  const up = val >= 0;
-  const arrow = up ? "▲" : "▼";
-  return `<span class="delta ${up ? "up" : "down"}">${arrow} ${Math.abs(val).toFixed(1)}% <span class="vs">vs prev</span></span>`;
-}
-
-function render(range) {
-  const d = RANGES[range];
-  const aov = d.revenue / d.orders;
-  const cvr = (d.orders / d.visitors) * 100;
-
-  // KPI cards
-  document.getElementById("kpis").innerHTML = [
-    { label: "💰 Revenue", value: fmtMoney(d.revenue), delta: d.revDelta },
-    { label: "📦 Orders", value: d.orders.toLocaleString(), delta: d.ordDelta },
-    { label: "🧾 Avg. order value", value: fmtMoney2(aov), delta: d.aovDelta },
-    { label: "🛒 Conversion rate", value: cvr.toFixed(2) + "%", delta: d.cvrDelta },
-  ].map(k => `
-    <div class="card">
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value">${k.value}</div>
-      ${delta(k.delta)}
-    </div>`).join("");
-
-  document.getElementById("rev-sub").textContent = `${fmtMoney(d.revenue)} over ${d.days} days`;
-
-  // Revenue chart
-  const labels = dateLabels(d.days);
-  const data = seriesFor(d.days, d.revenue);
+function drawTrend(gran){
+  const src = gran === "monthly" ? D.monthly : D.daily;
+  const labels = src.map(r => gran==="monthly" ? r.label
+                  : new Date(r.date+"T00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}));
+  const rev = src.map(r => r.revenue);
+  const margin = src.map(r => r.margin);
+  const ma = gran==="monthly" ? null : D.daily.map(r => r.ma7);
+  $("trend-sub").textContent = gran==="monthly"
+      ? "monthly revenue vs gross margin"
+      : "daily revenue (with 7-day average) vs gross margin";
+  const ctx = $("revChart").getContext("2d");
   if (revChart) revChart.destroy();
-  const ctx = document.getElementById("revChart").getContext("2d");
-  const grad = ctx.createLinearGradient(0, 0, 0, 260);
-  grad.addColorStop(0, "rgba(110,168,254,.35)");
-  grad.addColorStop(1, "rgba(110,168,254,0)");
-  revChart = new Chart(ctx, {
-    type: "line",
-    data: { labels, datasets: [{
-      data, fill: true, backgroundColor: grad, borderColor: "#6ea8fe",
-      borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: "#6ea8fe",
-      tension: .35,
-    }]},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: { label: c => " " + fmtMoney(c.parsed.y) },
-        backgroundColor: "#1f2330", borderColor: "#2a2f3d", borderWidth: 1,
-        titleColor: "#e7eaf0", bodyColor: "#e7eaf0", padding: 10, displayColors: false,
-      }},
-      scales: {
-        x: { grid: { display: false }, ticks: { color: "#8b93a7", maxTicksLimit: 8, font: { size: 11 } } },
-        y: { grid: { color: "#22273300" }, border: { display: false },
-             ticks: { color: "#8b93a7", font: { size: 11 }, callback: v => "$" + (v/1000).toFixed(0) + "k" } },
-      },
-    },
-  });
-
-  // Channel doughnut
-  if (channelChart) channelChart.destroy();
-  channelChart = new Chart(document.getElementById("channelChart"), {
-    type: "doughnut",
-    data: { labels: CHANNELS.map(c => c.label), datasets: [{
-      data: CHANNELS.map(c => c.value), backgroundColor: CHANNELS.map(c => c.color),
-      borderColor: "#181b23", borderWidth: 3, hoverOffset: 6,
-    }]},
-    options: {
-      responsive: true, maintainAspectRatio: false, cutout: "62%",
-      plugins: {
-        legend: { position: "bottom", labels: { color: "#8b93a7", boxWidth: 10, boxHeight: 10, padding: 14, font: { size: 12 } } },
-        tooltip: { callbacks: { label: c => " " + c.label + ": " + c.parsed + "%" },
-          backgroundColor: "#1f2330", borderColor: "#2a2f3d", borderWidth: 1,
-          titleColor: "#e7eaf0", bodyColor: "#e7eaf0", padding: 10 },
-      },
-    },
-  });
-
-  // Top products
-  const totalWeight = PRODUCTS.reduce((s, p) => s + p.weight, 0);
-  const maxShare = Math.max(...PRODUCTS.map(p => p.weight)) / totalWeight;
-  document.getElementById("prod-body").innerHTML = PRODUCTS.map(p => {
-    const share = p.weight / totalWeight;
-    const rev = Math.round(d.revenue * share);
-    const units = Math.round(rev / p.price);
-    return `<tr>
-      <td><div class="prod"><div class="swatch" style="background:${p.color}"></div>
-        <div>${p.name}<small>${p.sku}</small></div></div></td>
-      <td class="num">${units.toLocaleString()}</td>
-      <td class="num">${fmtMoney(rev)}</td>
-      <td><div class="bar-mini"><div style="width:${(share/maxShare)*100}%;background:${p.color}"></div></div></td>
-    </tr>`;
-  }).join("");
-
-  // Conversion funnel
-  const sessions = d.visitors;
-  const steps = [
-    { label: "Sessions", v: sessions, color: "#6ea8fe" },
-    { label: "Product views", v: Math.round(sessions * 0.62), color: "#7c9ffb" },
-    { label: "Added to cart", v: Math.round(sessions * 0.18), color: "#a78bfa" },
-    { label: "Reached checkout", v: Math.round(sessions * 0.095), color: "#c084fc" },
-    { label: "Purchased", v: d.orders, color: "#4ade80" },
+  const ds = [
+    { label:"Revenue", data:rev, borderColor:"#6ea8fe", backgroundColor:gradient(ctx,"#6ea8fe"),
+      fill:true, borderWidth:2, pointRadius:0, pointHoverRadius:4, tension:.35 },
+    { label:"Gross margin", data:margin, borderColor:"#4ade80", backgroundColor:"transparent",
+      fill:false, borderWidth:2, pointRadius:0, pointHoverRadius:4, tension:.35 },
   ];
-  const top = steps[0].v;
-  document.getElementById("funnel-sub").textContent = cvr.toFixed(2) + "% overall";
-  document.getElementById("funnel").innerHTML = steps.map(s => {
-    const pct = (s.v / top) * 100;
-    return `<div class="funnel-row">
-      <div class="funnel-label">${s.label}</div>
-      <div class="funnel-track"><div class="funnel-bar" style="width:${Math.max(pct,12)}%;background:${s.color}">${pct.toFixed(0)}%</div></div>
-      <div class="funnel-val">${s.v.toLocaleString()}</div>
-    </div>`;
-  }).join("");
-
-  document.getElementById("updated").textContent =
-    "showing last " + d.days + " days · repeat-customer rate " + d.repeat + "%";
+  if (ma) ds.push({ label:"7-day avg", data:ma, borderColor:"#a78bfa", borderDash:[5,4],
+      backgroundColor:"transparent", fill:false, borderWidth:1.5, pointRadius:0, tension:.35 });
+  revChart = new Chart(ctx, {
+    type:"line", data:{labels, datasets:ds},
+    options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:"index",intersect:false},
+      plugins:{ legend:{display:true, position:"top", align:"end",
+                  labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},
+        tooltip:{...TT, displayColors:true, callbacks:{label:c=>" "+c.dataset.label+": "+money(c.parsed.y)}}},
+      scales:{ x:{grid:{display:false},ticks:{maxTicksLimit:gran==="monthly"?12:10,font:{size:11}}},
+        y:{grid:{color:"#22273366"},border:{display:false},
+           ticks:{font:{size:11},callback:v=>moneyK(v)}}}}
+  });
 }
-
-// Range switcher
-document.getElementById("range").addEventListener("click", e => {
-  if (e.target.tagName !== "BUTTON") return;
-  document.querySelectorAll("#range button").forEach(b => b.classList.remove("active"));
+drawTrend("daily");
+$("trend-toggle").addEventListener("click", e=>{
+  if (e.target.tagName!=="BUTTON") return;
+  document.querySelectorAll("#trend-toggle button").forEach(b=>b.classList.remove("active"));
   e.target.classList.add("active");
-  render(Number(e.target.dataset.r));
+  drawTrend(e.target.dataset.g);
 });
 
-render(30);
+// ---------- Monthly bar ----------
+new Chart($("monthChart"), {
+  type:"bar",
+  data:{ labels:D.monthly.map(m=>m.label.replace(/ \d+$/,"")),
+    datasets:[{ data:D.monthly.map(m=>m.revenue), backgroundColor:"#6ea8fe",
+      borderRadius:6, maxBarThickness:34 }]},
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}, tooltip:{...TT, callbacks:{label:c=>" "+money(c.parsed.y)}}},
+    scales:{ x:{grid:{display:false},ticks:{font:{size:11}}},
+      y:{grid:{color:"#22273366"},border:{display:false},ticks:{font:{size:11},callback:v=>moneyK(v)}}}}
+});
+
+// ---------- Channels table + insight ----------
+const maxChanRev = Math.max(...D.channels.map(c=>c.revenue));
+$("channel-body").innerHTML = D.channels.map((c,i)=>`
+  <tr>
+    <td><div class="prod"><div class="dot" style="background:${COLORS[i%COLORS.length]}"></div>${c.channel}</div></td>
+    <td class="num">${c.orders.toLocaleString()}</td>
+    <td class="num">${money(c.revenue)}</td>
+    <td class="num">${c.adSpend>0 ? c.roas.toFixed(1)+"x" : "—"}</td>
+    <td class="num">${c.cac>0 ? money2(c.cac) : "organic"}</td>
+    <td class="num">${money(c.netMargin)}</td>
+  </tr>`).join("");
+const paid = D.channels.filter(c=>c.adSpend>0).sort((a,b)=>b.roas-a.roas);
+const topChan = D.channels[0];
+const bestRoas = paid[0];
+$("channel-insight").innerHTML = `<span class="h">Takeaway</span>
+  <b>${topChan.channel}</b> drives the most revenue (${pct(topChan.share)} of total).
+  Among paid channels, <b>${bestRoas.channel}</b> is most efficient at
+  <b class="pos">${bestRoas.roas.toFixed(1)}x ROAS</b> (${money2(bestRoas.cac)} to acquire an order).`;
+
+new Chart($("channelChart"), {
+  type:"doughnut",
+  data:{ labels:D.channels.map(c=>c.channel),
+    datasets:[{ data:D.channels.map(c=>c.revenue),
+      backgroundColor:D.channels.map((_,i)=>COLORS[i%COLORS.length]),
+      borderColor:"#181b23", borderWidth:3, hoverOffset:6 }]},
+  options:{ responsive:true, maintainAspectRatio:false, cutout:"60%",
+    plugins:{ legend:{position:"bottom",labels:{boxWidth:10,boxHeight:10,padding:11,font:{size:11.5}}},
+      tooltip:{...TT, callbacks:{label:c=>" "+c.label+": "+money(c.parsed)+" ("+pct(c.parsed/k.revenue)+")"}}}}
+});
+
+// ---------- Products ----------
+const maxProdRev = Math.max(...D.products.map(p=>p.revenue));
+$("prod-body").innerHTML = D.products.map((p,i)=>`
+  <tr>
+    <td><div class="prod"><div class="dot" style="background:${COLORS[i%COLORS.length]}"></div>
+      <div>${p.name}<small>${p.category} · ${money2(p.price)}</small></div></div></td>
+    <td class="num">${p.units.toLocaleString()}</td>
+    <td class="num">${money(p.revenue)}</td>
+    <td class="num"><span class="pill" style="background:rgba(74,222,128,.13);color:#4ade80">${pct(p.marginPct,0)}</span></td>
+    <td class="num">${p.inventory.toLocaleString()}</td>
+  </tr>`).join("");
+
+new Chart($("catChart"), {
+  type:"doughnut",
+  data:{ labels:D.categories.map(c=>c.category),
+    datasets:[{ data:D.categories.map(c=>c.revenue),
+      backgroundColor:D.categories.map((_,i)=>COLORS[i%COLORS.length]),
+      borderColor:"#181b23", borderWidth:3, hoverOffset:6 }]},
+  options:{ responsive:true, maintainAspectRatio:false, cutout:"60%",
+    plugins:{ legend:{position:"bottom",labels:{boxWidth:10,boxHeight:10,padding:10,font:{size:11.5}}},
+      tooltip:{...TT, callbacks:{label:c=>" "+c.label+": "+money(c.parsed)}}}}
+});
+
+// ---------- Customer segments ----------
+const segColor = { "VIP":"#a78bfa","Repeat":"#6ea8fe","One-time":"#4ade80","No purchase yet":"#3a4254" };
+new Chart($("segChart"), {
+  type:"bar",
+  data:{ labels:D.segments.map(s=>s.segment),
+    datasets:[{ data:D.segments.map(s=>s.count),
+      backgroundColor:D.segments.map(s=>segColor[s.segment]||"#94a3b8"),
+      borderRadius:6, maxBarThickness:46 }]},
+  options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+    plugins:{legend:{display:false},
+      tooltip:{...TT, callbacks:{label:c=>" "+c.parsed.x.toLocaleString()+" customers · "+money(D.segments[c.dataIndex].revenue)+" LTV"}}},
+    scales:{ x:{grid:{color:"#22273366"},border:{display:false},ticks:{font:{size:11}}},
+      y:{grid:{display:false},ticks:{font:{size:12}}}}}
+});
+
+// ---------- New vs returning ----------
+const nr = D.newReturning;
+new Chart($("nrChart"), {
+  type:"doughnut",
+  data:{ labels:["New customers","Returning customers"],
+    datasets:[{ data:[nr.new.revenue, nr.returning.revenue],
+      backgroundColor:["#6ea8fe","#a78bfa"], borderColor:"#181b23", borderWidth:3, hoverOffset:6 }]},
+  options:{ responsive:true, maintainAspectRatio:false, cutout:"62%",
+    plugins:{ legend:{position:"bottom",labels:{boxWidth:10,boxHeight:10,padding:13,font:{size:12}}},
+      tooltip:{...TT, callbacks:{label:c=>{
+        const tot=nr.new.revenue+nr.returning.revenue;
+        return " "+c.label+": "+money(c.parsed)+" ("+pct(c.parsed/tot)+")";}}}}}
+});
+
+// ---------- Geography ----------
+const geo = D.geography.slice(0,7);
+new Chart($("geoChart"), {
+  type:"bar",
+  data:{ labels:geo.map(g=>g.country),
+    datasets:[{ data:geo.map(g=>g.revenue), backgroundColor:"#22d3ee",
+      borderRadius:6, maxBarThickness:30 }]},
+  options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+    plugins:{legend:{display:false}, tooltip:{...TT, callbacks:{label:c=>" "+money(c.parsed.x)+" · "+geo[c.dataIndex].orders+" orders"}}},
+    scales:{ x:{grid:{color:"#22273366"},border:{display:false},ticks:{font:{size:11},callback:v=>moneyK(v)}},
+      y:{grid:{display:false},ticks:{font:{size:11.5}}}}}
+});
+
+// ---------- Returns ----------
+$("returns-sub").textContent = `${D.returns.count} returns · ${pct(D.returns.rate)} of orders · ${money(D.returns.total)} refunded`;
+new Chart($("returnChart"), {
+  type:"bar",
+  data:{ labels:D.returns.byReason.map(r=>r.reason),
+    datasets:[{ data:D.returns.byReason.map(r=>r.count), backgroundColor:"#f87171",
+      borderRadius:6, maxBarThickness:30 }]},
+  options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+    plugins:{legend:{display:false}, tooltip:{...TT, callbacks:{label:c=>" "+c.parsed.x+" returns · "+money(D.returns.byReason[c.dataIndex].amount)}}},
+    scales:{ x:{grid:{color:"#22273366"},border:{display:false},ticks:{font:{size:11}}},
+      y:{grid:{display:false},ticks:{font:{size:11}}}}}
+});
+const topReason = D.returns.byReason[0];
+const reasonShare = topReason.count / D.returns.count;
+$("return-insight").innerHTML = `
+  <div class="insight" style="margin-top:0">
+    <span class="h">Biggest driver</span>
+    <b>"${topReason.reason}"</b> accounts for <b>${pct(reasonShare,0)}</b> of all returns
+    (${topReason.count} of ${D.returns.count}), worth <b class="warn">${money(topReason.amount)}</b> in refunds.
+  </div>
+  <div class="insight">
+    <span class="h">Health check</span>
+    A <b>${pct(D.returns.rate)}</b> return rate is <b class="pos">healthy</b> for haircare
+    (typical ecommerce runs 5–10%). Refunds are <b>${pct(D.returns.total/k.revenue)}</b> of revenue.
+  </div>`;
 </script>
 </body>
 </html>
