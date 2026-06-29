@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lather &amp; Co — Store Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1116;
+    --panel: #181b23;
+    --panel-2: #1f2330;
+    --line: #2a2f3d;
+    --text: #e7eaf0;
+    --muted: #8b93a7;
+    --accent: #6ea8fe;
+    --green: #4ade80;
+    --red: #f87171;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  /* Header */
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, #6ea8fe, #a78bfa);
+    display: grid; place-items: center; font-size: 22px;
+  }
+  .brand h1 { font-size: 18px; font-weight: 650; letter-spacing: -.2px; }
+  .brand p { font-size: 13px; color: var(--muted); }
+  .range {
+    display: flex; gap: 4px; background: var(--panel); padding: 4px;
+    border-radius: 10px; border: 1px solid var(--line);
+  }
+  .range button {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 550;
+    transition: all .15s;
+  }
+  .range button.active { background: var(--panel-2); color: var(--text); }
+  .range button:hover:not(.active) { color: var(--text); }
+
+  /* KPI cards */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px; box-shadow: var(--shadow);
+  }
+  .kpi-label { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .kpi-value { font-size: 27px; font-weight: 680; letter-spacing: -.5px; margin: 8px 0 4px; }
+  .delta { font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .delta span.vs { color: var(--muted); font-weight: 500; }
+
+  /* Charts grid */
+  .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 22px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .panel-head h3 { font-size: 15px; font-weight: 620; }
+  .panel-head .sub { font-size: 12.5px; color: var(--muted); }
+  .chart-box { position: relative; height: 260px; }
+  .chart-box.sm { height: 230px; }
+
+  /* Bottom grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Product table */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; color: var(--muted); font-weight: 550; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; padding: 0 0 10px; }
+  td { padding: 11px 0; border-top: 1px solid var(--line); }
+  .prod { display: flex; align-items: center; gap: 11px; }
+  .swatch { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
+  .prod small { color: var(--muted); display: block; font-size: 12px; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .bar-mini { height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
+  .bar-mini > div { height: 100%; border-radius: 3px; background: var(--accent); }
+
+  /* Funnel */
+  .funnel-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .funnel-row:last-child { margin-bottom: 0; }
+  .funnel-label { width: 130px; font-size: 13px; color: var(--muted); flex-shrink: 0; }
+  .funnel-track { flex: 1; }
+  .funnel-bar { height: 30px; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 13px; font-weight: 600; color: #0f1116; }
+  .funnel-val { width: 110px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .funnel-val small { color: var(--muted); }
+
+  footer { margin-top: 28px; text-align: center; color: var(--muted); font-size: 12.5px; }
+
+  @media (max-width: 860px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .grid, .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">🧴</div>
+      <div>
+        <h1>Lather &amp; Co.</h1>
+        <p>Shampoo &amp; haircare · Store dashboard</p>
+      </div>
+    </div>
+    <div class="range" id="range">
+      <button data-r="7">7 days</button>
+      <button data-r="30" class="active">30 days</button>
+      <button data-r="90">90 days</button>
+    </div>
+  </header>
+
+  <!-- KPI cards -->
+  <section class="kpis" id="kpis"></section>
+
+  <!-- Revenue + channels -->
+  <section class="grid">
+    <div class="card">
+      <div class="panel-head">
+        <h3>Revenue</h3>
+        <div class="sub" id="rev-sub"></div>
+      </div>
+      <div class="chart-box"><canvas id="revChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="panel-head"><h3>Sales by channel</h3></div>
+      <div class="chart-box sm"><canvas id="channelChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Products + funnel -->
+  <section class="grid-2">
+    <div class="card">
+      <div class="panel-head">
+        <h3>Top products</h3>
+        <div class="sub">by revenue</div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Product</th><th class="num">Units</th><th class="num">Revenue</th><th style="width:90px">Share</th></tr>
+        </thead>
+        <tbody id="prod-body"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="panel-head">
+        <h3>Conversion funnel</h3>
+        <div class="sub" id="funnel-sub"></div>
+      </div>
+      <div id="funnel"></div>
+    </div>
+  </section>
+
+  <footer>
+    Demo dashboard · figures are sample data for preview only · <span id="updated"></span>
+  </footer>
+
+</div>
+
+<script>
+// ---------- Sample data (fake numbers, real ecommerce metrics) ----------
+const PRODUCTS = [
+  { name: "Rosemary Mint Strengthening", sku: "Anti-hair-loss · 300ml", color: "#6ea8fe", price: 24, weight: 30 },
+  { name: "Argan Repair Shampoo",        sku: "Dry/damaged · 300ml",   color: "#a78bfa", price: 22, weight: 24 },
+  { name: "Daily Clarifying Wash",       sku: "All hair types · 500ml", color: "#4ade80", price: 18, weight: 20 },
+  { name: "Volume Boost Duo",            sku: "Shampoo + conditioner",  color: "#fbbf24", price: 38, weight: 16 },
+  { name: "Color-Safe Sulfate-Free",     sku: "Dyed hair · 300ml",      color: "#f472b6", price: 26, weight: 10 },
+];
+
+const CHANNELS = [
+  { label: "Online store", value: 58, color: "#6ea8fe" },
+  { label: "Instagram / Meta", value: 21, color: "#a78bfa" },
+  { label: "Amazon", value: 14, color: "#fbbf24" },
+  { label: "TikTok Shop", value: 7, color: "#4ade80" },
+];
+
+// Per-range aggregates (preview values). Deltas are vs. previous period.
+const RANGES = {
+  7:  { revenue: 18420, orders: 642, visitors: 9120, repeat: 31.5, days: 7,  revDelta: 8.2,  ordDelta: 6.4,  aovDelta: 1.7,  cvrDelta: 0.9, repeatDelta: 2.1 },
+  30: { revenue: 76340, orders: 2680, visitors: 41200, repeat: 34.2, days: 30, revDelta: 12.4, ordDelta: 9.1,  aovDelta: 3.0,  cvrDelta: -0.6, repeatDelta: 4.3 },
+  90: { revenue: 214900, orders: 7510, visitors: 128400, repeat: 38.6, days: 90, revDelta: 19.8, ordDelta: 14.2, aovDelta: 4.9, cvrDelta: 1.4, repeatDelta: 6.0 },
+};
+
+const fmtMoney = n => "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+const fmtMoney2 = n => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Deterministic pseudo-random so the chart looks organic but stable per range
+function seriesFor(days, total) {
+  const out = [];
+  let acc = 0;
+  for (let i = 0; i < days; i++) {
+    const wave = 1 + 0.35 * Math.sin(i / 3.3) + 0.15 * Math.sin(i / 1.7 + 2);
+    const weekend = ([0,6].includes(i % 7)) ? 1.25 : 1;  // weekends sell more
+    const v = wave * weekend;
+    out.push(v);
+    acc += v;
+  }
+  return out.map(v => Math.round((v / acc) * total));
+}
+
+function dateLabels(days) {
+  const labels = [];
+  const end = new Date(2026, 5, 29); // fixed "today" for the demo
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(end);
+    d.setDate(end.getDate() - i);
+    labels.push(d.toLocaleDateString("en-US", { month: "short", day: "numeric" }));
+  }
+  return labels;
+}
+
+let revChart, channelChart;
+
+function delta(val) {
+  const up = val >= 0;
+  const arrow = up ? "▲" : "▼";
+  return `<span class="delta ${up ? "up" : "down"}">${arrow} ${Math.abs(val).toFixed(1)}% <span class="vs">vs prev</span></span>`;
+}
+
+function render(range) {
+  const d = RANGES[range];
+  const aov = d.revenue / d.orders;
+  const cvr = (d.orders / d.visitors) * 100;
+
+  // KPI cards
+  document.getElementById("kpis").innerHTML = [
+    { label: "💰 Revenue", value: fmtMoney(d.revenue), delta: d.revDelta },
+    { label: "📦 Orders", value: d.orders.toLocaleString(), delta: d.ordDelta },
+    { label: "🧾 Avg. order value", value: fmtMoney2(aov), delta: d.aovDelta },
+    { label: "🛒 Conversion rate", value: cvr.toFixed(2) + "%", delta: d.cvrDelta },
+  ].map(k => `
+    <div class="card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      ${delta(k.delta)}
+    </div>`).join("");
+
+  document.getElementById("rev-sub").textContent = `${fmtMoney(d.revenue)} over ${d.days} days`;
+
+  // Revenue chart
+  const labels = dateLabels(d.days);
+  const data = seriesFor(d.days, d.revenue);
+  if (revChart) revChart.destroy();
+  const ctx = document.getElementById("revChart").getContext("2d");
+  const grad = ctx.createLinearGradient(0, 0, 0, 260);
+  grad.addColorStop(0, "rgba(110,168,254,.35)");
+  grad.addColorStop(1, "rgba(110,168,254,0)");
+  revChart = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets: [{
+      data, fill: true, backgroundColor: grad, borderColor: "#6ea8fe",
+      borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: "#6ea8fe",
+      tension: .35,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: c => " " + fmtMoney(c.parsed.y) },
+        backgroundColor: "#1f2330", borderColor: "#2a2f3d", borderWidth: 1,
+        titleColor: "#e7eaf0", bodyColor: "#e7eaf0", padding: 10, displayColors: false,
+      }},
+      scales: {
+        x: { grid: { display: false }, ticks: { color: "#8b93a7", maxTicksLimit: 8, font: { size: 11 } } },
+        y: { grid: { color: "#22273300" }, border: { display: false },
+             ticks: { color: "#8b93a7", font: { size: 11 }, callback: v => "$" + (v/1000).toFixed(0) + "k" } },
+      },
+    },
+  });
+
+  // Channel doughnut
+  if (channelChart) channelChart.destroy();
+  channelChart = new Chart(document.getElementById("channelChart"), {
+    type: "doughnut",
+    data: { labels: CHANNELS.map(c => c.label), datasets: [{
+      data: CHANNELS.map(c => c.value), backgroundColor: CHANNELS.map(c => c.color),
+      borderColor: "#181b23", borderWidth: 3, hoverOffset: 6,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: "62%",
+      plugins: {
+        legend: { position: "bottom", labels: { color: "#8b93a7", boxWidth: 10, boxHeight: 10, padding: 14, font: { size: 12 } } },
+        tooltip: { callbacks: { label: c => " " + c.label + ": " + c.parsed + "%" },
+          backgroundColor: "#1f2330", borderColor: "#2a2f3d", borderWidth: 1,
+          titleColor: "#e7eaf0", bodyColor: "#e7eaf0", padding: 10 },
+      },
+    },
+  });
+
+  // Top products
+  const totalWeight = PRODUCTS.reduce((s, p) => s + p.weight, 0);
+  const maxShare = Math.max(...PRODUCTS.map(p => p.weight)) / totalWeight;
+  document.getElementById("prod-body").innerHTML = PRODUCTS.map(p => {
+    const share = p.weight / totalWeight;
+    const rev = Math.round(d.revenue * share);
+    const units = Math.round(rev / p.price);
+    return `<tr>
+      <td><div class="prod"><div class="swatch" style="background:${p.color}"></div>
+        <div>${p.name}<small>${p.sku}</small></div></div></td>
+      <td class="num">${units.toLocaleString()}</td>
+      <td class="num">${fmtMoney(rev)}</td>
+      <td><div class="bar-mini"><div style="width:${(share/maxShare)*100}%;background:${p.color}"></div></div></td>
+    </tr>`;
+  }).join("");
+
+  // Conversion funnel
+  const sessions = d.visitors;
+  const steps = [
+    { label: "Sessions", v: sessions, color: "#6ea8fe" },
+    { label: "Product views", v: Math.round(sessions * 0.62), color: "#7c9ffb" },
+    { label: "Added to cart", v: Math.round(sessions * 0.18), color: "#a78bfa" },
+    { label: "Reached checkout", v: Math.round(sessions * 0.095), color: "#c084fc" },
+    { label: "Purchased", v: d.orders, color: "#4ade80" },
+  ];
+  const top = steps[0].v;
+  document.getElementById("funnel-sub").textContent = cvr.toFixed(2) + "% overall";
+  document.getElementById("funnel").innerHTML = steps.map(s => {
+    const pct = (s.v / top) * 100;
+    return `<div class="funnel-row">
+      <div class="funnel-label">${s.label}</div>
+      <div class="funnel-track"><div class="funnel-bar" style="width:${Math.max(pct,12)}%;background:${s.color}">${pct.toFixed(0)}%</div></div>
+      <div class="funnel-val">${s.v.toLocaleString()}</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("updated").textContent =
+    "showing last " + d.days + " days · repeat-customer rate " + d.repeat + "%";
+}
+
+// Range switcher
+document.getElementById("range").addEventListener("click", e => {
+  if (e.target.tagName !== "BUTTON") return;
+  document.querySelectorAll("#range button").forEach(b => b.classList.remove("active"));
+  e.target.classList.add("active");
+  render(Number(e.target.dataset.r));
+});
+
+render(30);
+</script>
+</body>
+</html>
